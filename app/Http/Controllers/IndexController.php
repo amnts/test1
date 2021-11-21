@@ -2,20 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tariff;
+use App\Services\Tariffs;
 
 class IndexController extends Controller
 {
-    public function __invoke() {
+    public function __invoke(Tariffs $tariffsService) {
         return view('index', [
-            'tariffs' => Tariff::select('id', 'title', 'price')
-                ->with(['deliveryDays' => function($query) {
-                    $query->select('id', 'week_day', 'tariff_id')
-                        ->orderBy('index');
-                }])
-                ->orderBy('index')
-                ->get()
-                ->keyBy('id'),
+            'tariffs' => $tariffsService->getSortedWithDeliveryDays(),
         ]);
     }
 }
