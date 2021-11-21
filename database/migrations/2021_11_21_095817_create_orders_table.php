@@ -18,6 +18,7 @@ class CreateOrdersTable extends Migration
             $table->timestamps();
             $table->unsignedBigInteger('client_id')->index();
             $table->unsignedBigInteger('tariff_id')->index();
+            $table->unsignedBigInteger('delivery_day_id')->index();
         });
     }
 

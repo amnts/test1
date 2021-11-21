@@ -14,4 +14,8 @@ class DeliveryDay extends Model
     public $fillable = [
         'tariff_id', 'week_day',
     ];
+
+    protected $hidden = [
+        'tariff_id',
+    ];
 }

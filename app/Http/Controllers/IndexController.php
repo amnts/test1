@@ -8,12 +8,14 @@ class IndexController extends Controller
 {
     public function __invoke() {
         return view('index', [
-            'tariffs' => Tariff::query()
+            'tariffs' => Tariff::select('id', 'title', 'price')
                 ->with(['deliveryDays' => function($query) {
-                    $query->orderBy('index');
+                    $query->select('id', 'week_day', 'tariff_id')
+                        ->orderBy('index');
                 }])
                 ->orderBy('index')
-                ->get(),
+                ->get()
+                ->keyBy('id'),
         ]);
     }
 }
