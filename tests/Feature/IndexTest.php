@@ -14,7 +14,6 @@ class IndexTest extends TestCase
 
     public function test_index_is_working()
     {
-        $this->withoutExceptionHandling();
         $response = $this->get('/');
         $response->assertStatus(200);
     }

@@ -12,14 +12,14 @@ class OrderTest extends TestCase
     use RefreshDatabase;
 
     protected $seed = true;
-    
+
     public function test_order_can_be_created()
     {
-        $response = $this->post('/orders', [
+        $response = $this->postJson('/orders', [
             'name' => 'Михаил',
             'phone' => '79000000001',
             'tariff_id' => 1,
-            'delivery_day_id' => 1,
+            'delivery_day' => 'mon',
         ]);
 
         $response->assertStatus(200);
@@ -33,10 +33,24 @@ class OrderTest extends TestCase
 
     public function test_order_fields_required()
     {
-        $response = $this->post('/orders');
+        $response = $this->postJson('/orders');
 
         $response->assertInvalid([
-            'name', 'phone', 'tariff_id', 'delivery_day_id',
+            'name', 'phone', 'tariff_id', 'delivery_day',
+        ]);
+    }
+
+    public function test_delivery_day_checked()
+    {
+        $response = $this->postJson('/orders', [
+            'name' => 'Михаил',
+            'phone' => '79000000001',
+            'tariff_id' => 1,
+            'delivery_day' => 'sat',
+        ]);
+
+        $response->assertInvalid([
+            'delivery_day',
         ]);
     }
 
@@ -47,11 +61,11 @@ class OrderTest extends TestCase
             'phone' => '79000000001',
         ]);
 
-        $response = $this->post('/orders', [
+        $response = $this->postJson('/orders', [
             'name' => $client->name,
             'phone' => $client->phone,
             'tariff_id' => 1,
-            'delivery_day_id' => 1,
+            'delivery_day' => 'mon',
         ]);
 
         $response->assertStatus(200);
