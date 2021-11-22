@@ -38,17 +38,17 @@ class TariffSeeder extends Seeder
             1 => [
                 'title' => 'Тариф 1',
                 'price' => '100',
-                'days'  => ['mon', 'tue', 'wed', 'thu', 'fri'],
+                'days'  => [1, 2, 3, 4, 5],
             ],
             2 => [
                 'title' => 'Тариф 2',
                 'price' => '200',
-                'days'  => ['sat', 'sun'],
+                'days'  => [6, 7],
             ],
             3 => [
                 'title' => 'Тариф 3',
                 'price' => '300',
-                'days'  => ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+                'days'  => [1, 2, 3, 4, 5, 6, 7],
             ],
         ];
     }

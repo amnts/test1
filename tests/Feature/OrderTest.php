@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Client, Order};
+use App\Models\{Client, Order, Tariff};
+use App\Services\Tariffs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use DateTime;
+use DateInterval;
 
 class OrderTest extends TestCase
 {
@@ -13,19 +16,32 @@ class OrderTest extends TestCase
 
     protected $seed = true;
 
+    /**
+     * @var \App\Models\Client
+     */
+    private $client;
+
+    /**
+     * @var \App\Models\Tariff
+     */
+    private $tariff;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->client = Client::factory()->make();
+        $this->tariff = Tariff::first();
+    }
+
     public function test_order_can_be_created()
     {
-        $response = $this->postJson('/orders', [
-            'name' => 'Михаил',
-            'phone' => '79000000001',
-            'tariff_id' => 1,
-            'delivery_day' => 'mon',
-        ]);
+        $response = $this->postJson('/orders', array_merge([
+            'tariff_id' => $this->tariff->id,
+            'delivery_date_start' => $this->getAvailableDateForTariff(),
+        ], $this->client->only('name', 'phone')));
 
         $response->assertStatus(200);
-
         $this->assertEquals(Order::count(), 1);
-
         $response->assertJsonStructure([
             'id',
         ]);
@@ -36,42 +52,67 @@ class OrderTest extends TestCase
         $response = $this->postJson('/orders');
 
         $response->assertInvalid([
-            'name', 'phone', 'tariff_id', 'delivery_day',
+            'name', 'phone', 'tariff_id', 'delivery_date_start',
         ]);
     }
 
     public function test_delivery_day_checked()
     {
-        $response = $this->postJson('/orders', [
-            'name' => 'Михаил',
-            'phone' => '79000000001',
-            'tariff_id' => 1,
-            'delivery_day' => 'sat',
-        ]);
+        $response = $this->postJson('/orders', array_merge([
+            'tariff_id' => $this->tariff->id,
+            'delivery_date_start' => $this->getInvalidDateForTariff(),
+        ], $this->client->only('name', 'phone')));
 
         $response->assertInvalid([
-            'delivery_day',
+            'delivery_date_start',
         ]);
     }
 
     public function test_client_is_not_duplicated_after_order()
     {
-        $client = Client::create([
-            'name' => 'Михаил',
-            'phone' => '79000000001',
-        ]);
+        $this->client->save();
 
-        $response = $this->postJson('/orders', [
-            'name' => $client->name,
-            'phone' => $client->phone,
-            'tariff_id' => 1,
-            'delivery_day' => 'mon',
-        ]);
+        $response = $this->postJson('/orders', array_merge([
+            'tariff_id' => $this->tariff->id,
+            'delivery_date_start' => $this->getAvailableDateForTariff(),
+        ], $this->client->only('name', 'phone')));
 
         $response->assertStatus(200);
-
         $this->assertEquals(Order::count(), 1);
+        $this->assertEquals(Client::where('phone', $this->client->phone)->count(), 1);
+    }
 
-        $this->assertEquals(Client::where('phone', $client->phone)->count(), 1);
+    private function getAvailableDateForTariff()
+    {
+        $tariffService = app(Tariffs::class);
+        $date = new DateTime;
+        $interval = new DateInterval('P1D');
+
+        for ($shift = 0; $shift < 7; $shift++) {
+            if ($tariffService->isDateValidForTariff($date, $this->tariff)) {
+                return $date->format('d.m.Y');
+            }
+
+            $date->add($interval);
+        }
+
+        throw new \Exception('Tariff does not provide valid delivery date');
+    }
+
+    private function getInvalidDateForTariff()
+    {
+        $tariffService = app(Tariffs::class);
+        $date = new DateTime;
+        $interval = new DateInterval('P1D');
+
+        for ($shift = 0; $shift < 7; $shift++) {
+            if (!$tariffService->isDateValidForTariff($date, $this->tariff)) {
+                return $date->format('d.m.Y');
+            }
+
+            $date->add($interval);
+        }
+
+        throw new \Exception('All dates are valid for selected tariff');
     }
 }

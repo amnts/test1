@@ -10,23 +10,11 @@ class Order extends Model
     use HasFactory;
 
     public $fillable = [
-        'client_id', 'tariff_id', 'delivery_day',
+        'client_id', 'tariff_id', 'delivery_date_start',
     ];
 
     public function client()
     {
         return $this->belongsTo(Client::class);
-    }
-
-    public function setDeliveryDayAttribute($value)
-    {
-        $day = DeliveryDay::query()
-            ->where('tariff_id', $this->attributes['tariff_id'])
-            ->where('week_day', $value)
-            ->first();
-
-        if ($day) {
-            $this->attributes['delivery_day_id'] = $day->id;
-        }
     }
 }

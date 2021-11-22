@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Models\DeliveryDay;
+use App\Models\Tariff;
+use App\Services\Tariffs;
 use Illuminate\Foundation\Http\FormRequest;
+use DateTime;
 
 class OrderCreateRequest extends FormRequest
 {
@@ -24,25 +26,54 @@ class OrderCreateRequest extends FormRequest
      */
     public function rules()
     {
-        $deliveryDayExistsRule = function ($attribute, $value, $fail) {
-            if (!request()->has('tariff_id')) {
+        $testDeliveryDate = function ($attribute, $value, $fail)
+        {
+            try {
+                if (!request()->has('tariff_id') || empty($value)) {
+                    throw new \Exception;
+                }
+
+                $date = DateTime::createFromFormat('d.m.Y', $value);
+
+                if (!($date instanceof DateTime)) {
+                    throw new \Exception;
+                }
+
+                $tariff = Tariff::find(request()->tariff_id);
+
+                if (!$tariff || !(new Tariffs)->isDateValidForTariff($date, $tariff)) {
+                    throw new \Exception;
+                }
+            } catch (\Exception $e) {
                 $fail('The ' . $attribute . ' is invalid.');
             }
 
-            $dayExists = DeliveryDay::where('tariff_id', request()->tariff_id)
-                ->where('week_day', $value)
-                ->exists();
-
-            if (!$dayExists) {
-                $fail('The ' . $attribute . ' is invalid.');
-            }
+            return true;
         };
 
         return [
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:2', 'max:32'],
             'tariff_id' => ['required', 'numeric', 'exists:tariffs,id'],
-            'delivery_day' => ['required', 'string', 'size:3', $deliveryDayExistsRule],
+            'delivery_date_start' => ['required', 'string', 'regex:/^\d\d\.\d\d\.\d{4}$/', $testDeliveryDate],
         ];
+    }
+
+    /**
+    * Tranform the data after validation.
+    *
+    * @return array
+    */
+    public function getPreparedData(): array
+    {
+        $data = $this->validated();
+
+        $date = DateTime::createFromFormat('d.m.Y', $data['delivery_date_start']);
+
+        if ($date) {
+            $data['delivery_date_start'] = $date->format('Y-m-d');
+        }
+
+        return $data;
     }
 }

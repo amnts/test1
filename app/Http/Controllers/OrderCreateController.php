@@ -10,7 +10,7 @@ class OrderCreateController extends Controller
     public function __invoke(OrderCreateRequest $request, Orders $ordersService)
     {
         return response()->json([
-            'id' => $ordersService->createOrder($request->validated()),
+            'id' => $ordersService->createOrder($request->getPreparedData()),
         ]);
     }
 }
