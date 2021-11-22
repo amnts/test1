@@ -12,7 +12,7 @@ class Tariffs
         return Tariff::select('id', 'title', 'price')
             ->with(['deliveryDays' => function($query) {
                 $query->select('id', 'week_day', 'tariff_id')
-                    ->orderBy('index');
+                    ->orderBy('week_day');
             }])
             ->orderBy('index')
             ->get()

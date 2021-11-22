@@ -17,7 +17,6 @@ class CreateDeliveryDaysTable extends Migration
             $table->id();
             $table->unsignedBigInteger('tariff_id');
             $table->enum('week_day', [1, 2, 3, 4, 5, 6, 7])->index();
-            $table->unsignedTinyInteger('index')->default(0);
             $table->index(['tariff_id', 'week_day']);
         });
     }
