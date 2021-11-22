@@ -26,7 +26,6 @@ class TariffSeeder extends Seeder
             foreach ($tariffData['days'] as $index => $day) {
                 $tariff->deliveryDays()->updateOrCreate([
                     'week_day' => $day,
-                    'index' => $index,
                 ]);
             }
         }
