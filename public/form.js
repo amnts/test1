@@ -4,20 +4,53 @@ new Vue({
         phone: '',
         name: '',
         tariff_id: 0,
-        delivery_day: '',
+        delivery_date_start: '',
         tariffs: tariffs,
         lang: lang,
         errors: {},
         success: false
     },
 
+    components: {
+        vuejsDatepicker
+    },
+
     computed: {
-        currentTariff: function() {
+        disabledDays: function() {
+            let constraints = {
+                to: new Date()
+            };
+
             if (this.tariffs && this.tariffs[this.tariff_id]) {
-                return this.tariffs[this.tariff_id];
+                let availableDays = this.tariffs[this.tariff_id].delivery_days;
+                let disabledDays = {};
+
+                for (let i = 0; i < 7; i++) {
+                    disabledDays[i] = i;
+                }
+
+                for (let i = 0; i < availableDays.length; i++) {
+                    delete disabledDays[availableDays[i].week_day % 7];
+                }
+
+                constraints.days = Object.values(disabledDays);
             }
 
-            return {};
+            return constraints;
+        }
+    },
+
+    updated: function() {
+        if (!this.delivery_date_start) {
+            return;
+        }
+
+        if (!this.disabledDays.days) {
+            return;
+        }
+
+        if (this.disabledDays.days.indexOf(this.delivery_date_start.getDay()) !== -1) {
+            this.delivery_date_start = '';
         }
     },
 
@@ -36,7 +69,7 @@ new Vue({
                     name: this.name,
                     phone: this.phone,
                     tariff_id: this.tariff_id,
-                    delivery_day: this.delivery_day
+                    delivery_date_start: this.delivery_date_start
                 })
             }).then(function(response) {
                 return response.json();
@@ -58,7 +91,7 @@ new Vue({
                     Ваше имя
                 </label>
 
-                <input type="name" :class="'form-control' + (errors.name ? ' is-invalid' : '')" v-model="name">
+                <input type="name" :class="'form-control' + (errors.name ? ' is-invalid' : '')" v-model="name" required>
 
                 <div class="invalid-feedback" v-if="errors.name">
                     {{ errors.name[0] }}
@@ -70,7 +103,7 @@ new Vue({
                     Ваш телефон
                 </label>
 
-                <input type="phone" :class="'form-control' + (errors.phone ? ' is-invalid' : '')" v-model="phone">
+                <input type="phone" :class="'form-control' + (errors.phone ? ' is-invalid' : '')" v-model="phone" required>
 
                 <div class="invalid-feedback" v-if="errors.phone">
                     {{ errors.phone[0] }}
@@ -82,8 +115,8 @@ new Vue({
                     Тариф
                 </label>
 
-                <select name="tariff_id" :class="'form-control' + (errors.tariff_id ? ' is-invalid' : '')" v-model="tariff_id">
-                    <option value="0" selected>Выберите тариф</option>
+                <select name="tariff_id" :class="'form-control' + (errors.tariff_id ? ' is-invalid' : '')" v-model="tariff_id" required>
+                    <option value="" selected>Выберите тариф</option>
                     <option v-for="tariff in tariffs" :value="tariff.id">
                         {{ tariff.title }}
                     </option>
@@ -94,20 +127,24 @@ new Vue({
                 </div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3" v-if="tariff_id">
                 <label class="form-label">
                     День доставки
                 </label>
 
-                <select name="delivery_day" :class="'form-control' + (errors.delivery_day ? ' is-invalid' : '')" v-model="delivery_day">
-                    <option value="">Выберите день доставки</option>
-                    <option v-for="day in currentTariff.delivery_days" :value="day.week_day">
-                        {{ lang[day.week_day] }}
-                    </option>
-                </select>
+                <div :class="errors.delivery_date_start ? ' is-invalid' : ''">
+                    <vuejs-datepicker
+                        :disabled-dates="disabledDays"
+                        format="dd.MM.yyyy"
+                        v-model="delivery_date_start"
+                        input-class="form-control"
+                        :monday-first="true"
+                        :required="true"
+                    ></vuejs-datepicker>
+                </div>
 
-                <div class="invalid-feedback" v-if="errors.delivery_day">
-                    {{ errors.delivery_day[0] }}
+                <div class="invalid-feedback" v-if="errors.delivery_date_start">
+                    {{ errors.delivery_date_start[0] }}
                 </div>
             </div>
 
