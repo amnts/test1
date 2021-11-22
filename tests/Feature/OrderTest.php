@@ -90,7 +90,7 @@ class OrderTest extends TestCase
 
         for ($shift = 0; $shift < 7; $shift++) {
             if ($tariffService->isDateValidForTariff($date, $this->tariff)) {
-                return $date->format('d.m.Y');
+                return $date->format('Y-m-d');
             }
 
             $date->add($interval);
@@ -107,7 +107,7 @@ class OrderTest extends TestCase
 
         for ($shift = 0; $shift < 7; $shift++) {
             if (!$tariffService->isDateValidForTariff($date, $this->tariff)) {
-                return $date->format('d.m.Y');
+                return $date->format('Y-m-d');
             }
 
             $date->add($interval);

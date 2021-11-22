@@ -33,7 +33,7 @@ class OrderCreateRequest extends FormRequest
                     throw new \Exception;
                 }
 
-                $date = DateTime::createFromFormat('d.m.Y', $value);
+                $date = DateTime::createFromFormat('Y-m-d+', $value);
 
                 if (!($date instanceof DateTime)) {
                     throw new \Exception;
@@ -55,7 +55,7 @@ class OrderCreateRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:2', 'max:32'],
             'tariff_id' => ['required', 'numeric', 'exists:tariffs,id'],
-            'delivery_date_start' => ['required', 'string', 'regex:/^\d\d\.\d\d\.\d{4}$/', $testDeliveryDate],
+            'delivery_date_start' => ['required', 'string', 'regex:/^\d{4}-\d\d-\d\d/', $testDeliveryDate],
         ];
     }
 
@@ -68,7 +68,7 @@ class OrderCreateRequest extends FormRequest
     {
         $data = $this->validated();
 
-        $date = DateTime::createFromFormat('d.m.Y', $data['delivery_date_start']);
+        $date = DateTime::createFromFormat('Y-m-d+', $data['delivery_date_start']);
 
         if ($date) {
             $data['delivery_date_start'] = $date->format('Y-m-d');
