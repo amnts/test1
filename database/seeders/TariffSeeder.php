@@ -23,7 +23,7 @@ class TariffSeeder extends Seeder
                 'id' => $id,
             ], $insertData);
 
-            foreach ($tariffData['days'] as $index => $day) {
+            foreach ($tariffData['days'] as $day) {
                 $tariff->deliveryDays()->updateOrCreate([
                     'week_day' => $day,
                 ]);
@@ -37,17 +37,17 @@ class TariffSeeder extends Seeder
             1 => [
                 'title' => 'Тариф 1',
                 'price' => '100',
-                'days'  => [1, 2, 3, 4, 5],
+                'days'  => [1, 2, 5, 6],
             ],
             2 => [
                 'title' => 'Тариф 2',
                 'price' => '200',
-                'days'  => [6, 7],
+                'days'  => [1, 5],
             ],
             3 => [
                 'title' => 'Тариф 3',
                 'price' => '300',
-                'days'  => [1, 2, 3, 4, 5, 6, 7],
+                'days'  => [1, 3, 5],
             ],
         ];
     }
