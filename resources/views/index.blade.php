@@ -6,7 +6,6 @@
 
 @push('scripts')
     <script>
-        const lang = @json(__('weekdays'));
         const tariffs = @json($tariffs);
     </script>
 

@@ -28,24 +28,20 @@ class OrderCreateRequest extends FormRequest
     {
         $testDeliveryDate = function ($attribute, $value, $fail)
         {
-            try {
-                if (!request()->has('tariff_id') || empty($value)) {
-                    throw new \Exception;
-                }
+            if (!request()->has('tariff_id') || empty($value)) {
+                return $fail(__('validation.choose_date_and_tariff'));
+            }
 
-                $date = DateTime::createFromFormat('Y-m-d+', $value);
+            $date = DateTime::createFromFormat('Y-m-d+', $value);
 
-                if (!($date instanceof DateTime)) {
-                    throw new \Exception;
-                }
+            if (!($date instanceof DateTime)) {
+                return $fail(__('validation.date_format_incorrect'));
+            }
 
-                $tariff = Tariff::find(request()->tariff_id);
+            $tariff = Tariff::find(request()->tariff_id);
 
-                if (!$tariff || !(new Tariffs)->isDateValidForTariff($date, $tariff)) {
-                    throw new \Exception;
-                }
-            } catch (\Exception $e) {
-                $fail('The ' . $attribute . ' is invalid.');
+            if (!$tariff || !(new Tariffs)->isDateValidForTariff($date, $tariff)) {
+                return $fail(__('validation.date_unavailable_for_tariff'));
             }
 
             return true;

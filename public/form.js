@@ -6,7 +6,6 @@ new Vue({
         tariff_id: 0,
         delivery_date_start: '',
         tariffs: tariffs,
-        lang: lang,
         errors: {},
         success: false
     },

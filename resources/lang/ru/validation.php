@@ -160,4 +160,7 @@ return [
         'username'              => 'Никнейм',
         'year'                  => 'Год',
     ],
+    'choose_date_and_tariff' => 'Выберите дату доставки и тариф',
+    'date_format_incorrect' => 'Формат даты неверный',
+    'date_unavailable_for_tariff' => 'Дата доставки недоступна для выбранного тарифа',
 ];
